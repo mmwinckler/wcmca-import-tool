@@ -1,0 +1,6 @@
+user_email,company,country,postcode,state,city,address_1,address_2,phone
+# Sample for deleting addresses - only user_email and company are required for deletion
+user@example.com,株式会社サンプル東京本社,JP,,,,,
+user@example.com,株式会社サンプル大阪支社,JP,,,,,
+another@example.com,サンプルショップ札幌店,JP,,,,,
+another@example.com,サンプルショップ福岡店,JP,,,,,,

@@ -1,0 +1,6 @@
+user_email,company,country,postcode,state,city,address_1,address_2,phone
+# Sample shipping addresses for import
+user@example.com,株式会社サンプル東京本社,JP,100-0001,東京都,千代田区,千代田1-1-1,サンプルビル1F,03-1234-5678
+user@example.com,株式会社サンプル大阪支社,JP,530-0001,大阪府,大阪市北区,梅田2-2-2,サンプルビル2F,06-1234-5678
+another@example.com,サンプルショップ札幌店,JP,060-0001,北海道,札幌市中央区,北1条西3-3-3,,011-234-5678
+another@example.com,サンプルショップ福岡店,JP,810-0001,福岡県,福岡市中央区,天神4-4-4,,092-234-5678
