@@ -571,6 +571,24 @@ class WCMCA_CSV_Importer {
             return $prefecture_name;
         }
         
+        // 数字のみの場合（1, 2, 13, 47など）
+        if (preg_match('/^\d{1,2}$/', $prefecture_name)) {
+            $number = intval($prefecture_name);
+            // 1〜47の範囲内であれば、JPとゼロパディングを追加
+            if ($number >= 1 && $number <= 47) {
+                return 'JP' . str_pad($number, 2, '0', STR_PAD_LEFT);
+            }
+        }
+        
+        // 数字文字列の場合（"01", "02", "13", "47"など）
+        if (preg_match('/^\d{2}$/', $prefecture_name)) {
+            $number = intval($prefecture_name);
+            // 1〜47の範囲内であれば、JPを追加
+            if ($number >= 1 && $number <= 47) {
+                return 'JP' . $prefecture_name;
+            }
+        }
+        
         // マッピングから変換
         if (isset($this->prefecture_mapping[$prefecture_name])) {
             return $this->prefecture_mapping[$prefecture_name];
