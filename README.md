@@ -96,8 +96,10 @@ php wcmca-import-script-flexible.php sjis_data.csv --encoding=SJIS
 
 配送先住所の場合：
 - `first_name`と`last_name`は空でもOK
-- `company`フィールドが`Address Site ID`として使用される
 - `company`が必須
+- **Address Site ID**の設定：
+  - `address_id`列がある場合：`address_id`値をAddress Site IDとして使用
+  - `address_id`列がない場合：`company`値をAddress Site IDとして使用
 
 ### サンプルCSV
 
@@ -106,6 +108,13 @@ php wcmca-import-script-flexible.php sjis_data.csv --encoding=SJIS
 user_email,company,country,postcode,state,city,address_1,address_2,phone
 user@example.com,株式会社サンプル東京本社,JP,100-0001,東京都,千代田区,千代田1-1-1,サンプルビル1F,03-1234-5678
 user@example.com,株式会社サンプル大阪支社,JP,530-0001,大阪府,大阪市北区,梅田2-2-2,サンプルビル2F,06-1234-5678
+```
+
+**address_id付きインポート用** (`sample_import_with_id.csv`):
+```csv
+user_email,address_id,company,country,postcode,state,city,address_1,address_2,phone
+user@example.com,SITE001,株式会社サンプル東京本社,JP,100-0001,東京都,千代田区,千代田1-1-1,サンプルビル1F,03-1234-5678
+user@example.com,SITE002,株式会社サンプル大阪支社,JP,530-0001,大阪府,大阪市北区,梅田2-2-2,サンプルビル2F,06-1234-5678
 ```
 
 **削除用** (`sample_delete.csv`):

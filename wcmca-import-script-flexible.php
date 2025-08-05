@@ -38,6 +38,12 @@ class WCMCA_CSV_Importer {
         'name' => 'address_name',
         '住所名' => 'address_name',
         
+        // 住所ID
+        'address_id' => 'address_id',
+        'address_site_id' => 'address_id',
+        'site_id' => 'address_id',
+        '住所ID' => 'address_id',
+        
         // 基本情報
         'first_name' => 'first_name',
         'firstname' => 'first_name',
@@ -411,10 +417,14 @@ class WCMCA_CSV_Importer {
                 sprintf('%s %s - %s', $data['first_name'], $data['last_name'], $data['address_1']))
         );
         
-        // shippingタイプの場合、IDとAddress Site IDにcompanyをセット
-        if ($type === 'shipping' && !empty($data['company'])) {
-            // 正しいフィールド名を使用
-            $new_address['shipping_site_id'] = $data['company'];
+        // shippingタイプの場合、shipping_site_idを設定
+        if ($type === 'shipping') {
+            // address_idが指定されている場合はそれを使用、なければcompanyを使用
+            if (!empty($data['address_id'])) {
+                $new_address['shipping_site_id'] = $data['address_id'];
+            } elseif (!empty($data['company'])) {
+                $new_address['shipping_site_id'] = $data['company'];
+            }
         }
         
         // 標準フィールド
@@ -504,28 +514,33 @@ class WCMCA_CSV_Importer {
         
         // 削除対象を検索
         $type = $data['type'];
-        $company = $data['company'] ?? '';
+        $delete_id = !empty($data['address_id']) ? $data['address_id'] : ($data['company'] ?? '');
         $deleted = false;
         $new_addresses = array();
         
         foreach ($existing_addresses as $address) {
-            // タイプとID（company値）が一致する住所を削除
+            // タイプとIDが一致する住所を削除
             $should_delete = false;
             
             if (isset($address['type']) && $address['type'] === $type) {
-                // shipping_idフィールドで一致をチェック
-                if ($type === 'shipping' && isset($address['shipping_id']) && 
-                    $address['shipping_id'] === $company) {
+                // shipping_site_idフィールドで一致をチェック
+                if ($type === 'shipping' && isset($address['shipping_site_id']) && 
+                    $address['shipping_site_id'] === $delete_id) {
+                    $should_delete = true;
+                }
+                // shipping_idフィールドで一致をチェック（後方互換性）
+                elseif ($type === 'shipping' && isset($address['shipping_id']) && 
+                    $address['shipping_id'] === $delete_id) {
                     $should_delete = true;
                 }
                 // billing_idフィールドで一致をチェック（billingの場合）
                 elseif ($type === 'billing' && isset($address['billing_id']) && 
-                    $address['billing_id'] === $company) {
+                    $address['billing_id'] === $delete_id) {
                     $should_delete = true;
                 }
                 // IDフィールドがない場合はcompanyフィールドで一致をチェック
                 elseif (isset($address[$type . '_company']) && 
-                    $address[$type . '_company'] === $company) {
+                    $address[$type . '_company'] === $delete_id) {
                     $should_delete = true;
                 }
             }
@@ -537,7 +552,7 @@ class WCMCA_CSV_Importer {
                     $line_number,
                     $user_identifier,
                     $type === 'billing' ? '請求先' : '配送先',
-                    $company
+                    $delete_id
                 );
                 $this->skip_logs[] = $skip_message;
                 $deleted = true;
@@ -558,7 +573,7 @@ class WCMCA_CSV_Importer {
                 $line_number,
                 $user_identifier,
                 $type === 'billing' ? '請求先' : '配送先',
-                $company
+                $delete_id
             );
             $this->skip_logs[] = $skip_message;
             return 'skipped';
@@ -689,30 +704,30 @@ class WCMCA_CSV_Importer {
         
         // 削除対象を検索
         $type = $data['type'];
-        $company = $data['company'] ?? '';
+        $delete_id = !empty($data['address_id']) ? $data['address_id'] : ($data['company'] ?? '');
         $found = false;
         
         foreach ($existing_addresses as $address) {
-            // タイプとID（company値）が一致する住所を探す
+            // タイプとIDが一致する住所を探す
             if (isset($address['type']) && $address['type'] === $type) {
                 // shipping_site_idフィールドで一致をチェック
                 if ($type === 'shipping' && isset($address['shipping_site_id']) && 
-                    $address['shipping_site_id'] === $company) {
+                    $address['shipping_site_id'] === $delete_id) {
                     $found = true;
                 }
-                // shipping_idフィールドで一致をチェック
+                // shipping_idフィールドで一致をチェック（後方互換性）
                 elseif ($type === 'shipping' && isset($address['shipping_id']) && 
-                    $address['shipping_id'] === $company) {
+                    $address['shipping_id'] === $delete_id) {
                     $found = true;
                 }
                 // billing_idフィールドで一致をチェック（billingの場合）
                 elseif ($type === 'billing' && isset($address['billing_id']) && 
-                    $address['billing_id'] === $company) {
+                    $address['billing_id'] === $delete_id) {
                     $found = true;
                 }
                 // IDフィールドがない場合はcompanyフィールドで一致をチェック
                 elseif (isset($address[$type . '_company']) && 
-                    $address[$type . '_company'] === $company) {
+                    $address[$type . '_company'] === $delete_id) {
                     $found = true;
                 }
                 
@@ -728,7 +743,7 @@ class WCMCA_CSV_Importer {
                 $line_number,
                 $user_identifier,
                 $type === 'billing' ? '請求先' : '配送先',
-                $company
+                $delete_id
             );
             return true;
         } else {
@@ -737,7 +752,7 @@ class WCMCA_CSV_Importer {
                 $line_number,
                 $user_identifier,
                 $type === 'billing' ? '請求先' : '配送先',
-                $company
+                $delete_id
             );
             return 'skipped';
         }
